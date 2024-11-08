@@ -770,7 +770,14 @@
             try {
                 // 逐个检测令牌，但先不显示结果
                 for (let i = 0; i < tokens.length; i++) {
-                    loadingText.textContent = `正在检测第 ${i + 1}/${tokens.length} 个令牌...`;
+                    // 随机选择一个加载提示
+                    const loadingMessages = [
+                        `正在检测第 ${i + 1}/${tokens.length} 个令牌...`,
+                        `正在检测第 ${i + 1}/${tokens.length} 个令牌... 别搞了oai🙏`,
+                        `正在检测第 ${i + 1}/${tokens.length} 个令牌... oai别搞了🙏`
+                    ];
+                    const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+                    loadingText.textContent = randomMessage;
                     
                     const response = await fetch('/api/check-tokens', {
                         method: 'POST',
@@ -925,7 +932,7 @@
                 return;
             }
             
-            if (confirm('确定要��除所有备忘吗？此操作不可恢复！')) {
+            if (confirm('确定要除所有备忘吗？此操作不可恢复！')) {
                 // 重置为默认的三个备忘录
                 memos = JSON.parse(JSON.stringify(DEFAULT_MEMOS));
                 localStorage.setItem('memos', JSON.stringify(memos));
