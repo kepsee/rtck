@@ -672,7 +672,7 @@
                     <h5 class="mb-0">备忘录</h5>
                     <div class="btn-group">
                         <button class="btn btn-sm btn-primary me-2" onclick="addMemo()">新增备忘</button>
-                        <button class="btn btn-sm btn-danger" onclick="clearAllMemos()">清除全部</button>
+                        <button class="btn btn-sm btn-danger" onclick="clearAllMemos()">清��全部</button>
                     </div>
                 </div>
                 <div class="card-body" id="memoList">
@@ -768,7 +768,7 @@
             lastResults = []; // 清空上次的结果
 
             try {
-                // 逐个检测令牌
+                // 逐个检测令牌，但先不显示结果
                 for (let i = 0; i < tokens.length; i++) {
                     loadingText.textContent = `正在检测第 ${i + 1}/${tokens.length} 个令牌...`;
                     
@@ -778,7 +778,7 @@
                             'Content-Type': 'application/json',
                             'Accept': 'application/json'
                         },
-                        body: JSON.stringify({ tokens: [tokens[i]] }) // 每次只发送一个令牌
+                        body: JSON.stringify({ tokens: [tokens[i]] })
                     });
 
                     if (!response.ok) {
@@ -788,41 +788,46 @@
                     const result = await response.json();
                     lastResults.push(result[0]);
 
-                    // 实时显示结果
-                    const validCount = lastResults.filter(r => r.status === 'valid').length;
-                    results.innerHTML = `
-                        <div class="alert alert-info">
-                            <div class="fw-bold">检测结果统计：</div>
-                            <div>总计: ${lastResults.length}/${tokens.length} 个令牌</div>
-                            <div>有效: ${validCount} 个</div>
-                            <div>无效: ${lastResults.length - validCount} 个</div>
-                        </div>
-                    `;
+                    // 在检测下一个令牌之前等待1秒
+                    if (i < tokens.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
 
-                    // 添加单个结果卡片
+                // 所有令牌检测完成后，一次性显示所有结果
+                const validCount = lastResults.filter(r => r.status === 'valid').length;
+                
+                // 显示统计信息
+                results.innerHTML = `
+                    <div class="alert alert-info">
+                        <div class="fw-bold">检测结果统计：</div>
+                        <div>总计: ${lastResults.length}/${tokens.length} 个令牌</div>
+                        <div>有效: ${validCount} 个</div>
+                        <div>无效: ${lastResults.length - validCount} 个</div>
+                    </div>
+                `;
+
+                // 显示所有结果卡片
+                lastResults.forEach((result, i) => {
                     const card = document.createElement('div');
-                    card.className = `result-card ${result[0].status === 'valid' ? 'success' : 'error'}`;
+                    card.className = `result-card ${result.status === 'valid' ? 'success' : 'error'}`;
                     const num = (i + 1).toString().padStart(3, ' ');
                     const displayToken = tokens[i] === '' ? '(空行)' : tokens[i];
                     card.innerHTML = `
                         <div class="fw-bold">序号 ${num}. ${displayToken}</div>
-                        <div>状态: ${result[0].status === 'valid' ? '有效' : '无效'}</div>
-                        <div>消息: ${result[0].message}</div>
-                        ${result[0].status === 'valid' ? `
+                        <div>状态: ${result.status === 'valid' ? '有效' : '无效'}</div>
+                        <div>消息: ${result.message}</div>
+                        ${result.status === 'valid' ? `
                             <div class="mt-2">
-                                <button class="btn btn-sm btn-outline-primary" onclick="copy('${result[0].access_token}')">
+                                <button class="btn btn-sm btn-outline-primary" onclick="copy('${result.access_token}')">
                                     复制 Access Token
                                 </button>
                             </div>
                         ` : ''}
                     `;
                     results.appendChild(card);
+                });
 
-                    // 在检测下一个令牌之前等待1秒
-                    if (i < tokens.length - 1) {
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                    }
-                }
             } catch (error) {
                 results.innerHTML += `
                     <div class="alert alert-danger">
@@ -1144,7 +1149,7 @@
             localStorage.setItem('memos', JSON.stringify(memos));
         }
 
-        // ���加切换备忘录详情的函数
+        // 加切换备忘录详情的函数
         function toggleMemoDetails(id, event) {
             if (event) {
                 event.stopPropagation();
