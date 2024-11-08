@@ -491,7 +491,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-weight: 500;  /* 让标题更明显 */
+            font-weight: 500;  /* 让标更明显 */
         }
 
         input[type="text"] {
@@ -672,7 +672,7 @@
                     <h5 class="mb-0">备忘录</h5>
                     <div class="btn-group">
                         <button class="btn btn-sm btn-primary me-2" onclick="addMemo()">新增备忘</button>
-                        <button class="btn btn-sm btn-danger" onclick="clearAllMemos()">清��全部</button>
+                        <button class="btn btn-sm btn-danger" onclick="clearAllMemos()">清全部</button>
                     </div>
                 </div>
                 <div class="card-body" id="memoList">
@@ -788,9 +788,9 @@
                     const result = await response.json();
                     lastResults.push(result[0]);
 
-                    // 在检测下一个令牌之前等待1秒
+                    // 在检测下一个令牌之前等待1.5秒
                     if (i < tokens.length - 1) {
-                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        await new Promise(resolve => setTimeout(resolve, 1500));
                     }
                 }
 
@@ -925,7 +925,7 @@
                 return;
             }
             
-            if (confirm('确定要清除所有备忘吗？此操作不可恢复！')) {
+            if (confirm('确定要��除所有备忘吗？此操作不可恢复！')) {
                 // 重置为默认的三个备忘录
                 memos = JSON.parse(JSON.stringify(DEFAULT_MEMOS));
                 localStorage.setItem('memos', JSON.stringify(memos));
