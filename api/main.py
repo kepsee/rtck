@@ -23,7 +23,7 @@ app.add_middleware(
 # 速率限制配置
 RATE_LIMIT_DURATION = 60  # 60秒时间窗口
 MAX_REQUESTS = 1000  # 每个IP每分钟最多1000个请求
-MAX_TOKENS_PER_REQUEST = 1000  # 每次请求最多验证1000个令牌
+MAX_TOKENS_PER_REQUEST = 5  # 每次请求最多验证5个令牌
 MAX_CONCURRENT_CONNECTIONS = 5000  # 最大并发连接数
 TOKEN_BUCKETS = defaultdict(lambda: {"count": 0, "reset_time": time.time()})
 

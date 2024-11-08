@@ -758,8 +758,17 @@
                 return;
             }
 
+            // 添加令牌数量限制检查
+            if (tokens.length > 5) {
+                alert('每次最多只能检测5个令牌');
+                return;
+            }
+
             loading.style.display = 'block';
-            loadingText.textContent = '正在检测...';
+            loadingText.textContent = 'oai别搞了🙏';
+            
+            // 等待固定的1.8秒
+            await new Promise(resolve => setTimeout(resolve, 1800));
             
             try {
                 const response = await fetch('/api/check-tokens', {
