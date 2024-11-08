@@ -758,66 +758,73 @@
                 return;
             }
 
-            // 添加令牌数量限制检查
-            if (tokens.length > 5) {
-                alert('每次最多只能检测5个令牌');
+            if (tokens.length > 20) {
+                alert('每次最多只能检测20个令牌');
                 return;
             }
 
             loading.style.display = 'block';
-            loadingText.textContent = 'oai别搞了🙏';
-            
-            // 等待固定的1.8秒
-            await new Promise(resolve => setTimeout(resolve, 1800));
-            
+            results.innerHTML = ''; // 清空之前的结果
+            lastResults = []; // 清空上次的结果
+
             try {
-                const response = await fetch('/api/check-tokens', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ tokens })
-                });
+                // 逐个检测令牌
+                for (let i = 0; i < tokens.length; i++) {
+                    loadingText.textContent = `正在检测第 ${i + 1}/${tokens.length} 个令牌...`;
+                    
+                    const response = await fetch('/api/check-tokens', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ tokens: [tokens[i]] }) // 每次只发送一个令牌
+                    });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
 
-                lastResults = await response.json();
-                
-                // 显示结果统计
-                const validCount = lastResults.filter(r => r.status === 'valid').length;
-                results.innerHTML = `
-                    <div class="alert alert-info">
-                        <div class="fw-bold">检测结果统计：</div>
-                        <div>总计: ${lastResults.length} 个令牌</div>
-                        <div>有效: ${validCount} 个</div>
-                        <div>无效: ${lastResults.length - validCount} 个</div>
-                    </div>
-                `;
+                    const result = await response.json();
+                    lastResults.push(result[0]);
 
-                lastResults.forEach((result, index) => {
+                    // 实时显示结果
+                    const validCount = lastResults.filter(r => r.status === 'valid').length;
+                    results.innerHTML = `
+                        <div class="alert alert-info">
+                            <div class="fw-bold">检测结果统计：</div>
+                            <div>总计: ${lastResults.length}/${tokens.length} 个令牌</div>
+                            <div>有效: ${validCount} 个</div>
+                            <div>无效: ${lastResults.length - validCount} 个</div>
+                        </div>
+                    `;
+
+                    // 添加单个结果卡片
                     const card = document.createElement('div');
-                    card.className = `result-card ${result.status === 'valid' ? 'success' : 'error'}`;
-                    const num = (index + 1).toString().padStart(3, ' ');
-                    const displayToken = tokens[index] === '' ? '(空行)' : tokens[index];
+                    card.className = `result-card ${result[0].status === 'valid' ? 'success' : 'error'}`;
+                    const num = (i + 1).toString().padStart(3, ' ');
+                    const displayToken = tokens[i] === '' ? '(空行)' : tokens[i];
                     card.innerHTML = `
                         <div class="fw-bold">序号 ${num}. ${displayToken}</div>
-                        <div>状态: ${result.status === 'valid' ? '有效' : '无效'}</div>
-                        <div>消息: ${result.message}</div>
-                        ${result.status === 'valid' ? `
+                        <div>状态: ${result[0].status === 'valid' ? '有效' : '无效'}</div>
+                        <div>消息: ${result[0].message}</div>
+                        ${result[0].status === 'valid' ? `
                             <div class="mt-2">
-                                <button class="btn btn-sm btn-outline-primary" onclick="copy('${result.access_token}')">
+                                <button class="btn btn-sm btn-outline-primary" onclick="copy('${result[0].access_token}')">
                                     复制 Access Token
                                 </button>
                             </div>
                         ` : ''}
                     `;
                     results.appendChild(card);
-                });
+
+                    // 在检测下一个令牌之前等待1秒
+                    if (i < tokens.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
             } catch (error) {
-                results.innerHTML = `
+                results.innerHTML += `
                     <div class="alert alert-danger">
                         检测失败: ${error.message}
                     </div>
@@ -1137,7 +1144,7 @@
             localStorage.setItem('memos', JSON.stringify(memos));
         }
 
-        // 添加切换备忘录详情的函数
+        // ���加切换备忘录详情的函数
         function toggleMemoDetails(id, event) {
             if (event) {
                 event.stopPropagation();
