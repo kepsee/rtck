@@ -62,7 +62,7 @@ async def check_token(token: str, semaphore: asyncio.Semaphore) -> dict:
                 # 使用 token.oaifree.com API 验证
                 try:
                     refresh_response = await client.post(
-                        "https://token.oaifree.com/api/auth/refresh",
+                        "https://token.oaiapi.icu/api/auth/refresh",
                         headers={
                             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
                         },
